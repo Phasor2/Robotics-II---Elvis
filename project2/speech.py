@@ -1,46 +1,51 @@
 #!/usr/bin/env python
 
-'''
-says a line if the line exists for the robot.
-Then publishes increment to indicate its done.
-'''
-
-#import rospy
+import rospy
 import wave
 import os
 import sys
 from subprocess import Popen
-#from std_msgs.msg import Int32
-#from std_msgs.msg import String
+from std_msgs.msg import Int32
+from std_msgs.msg import String
 from playsound import playsound
+# generate random integer values
+from random import seed
+from random import randint
 
 #arm = rospy.Publisher('/arm_act', Int32, queue_size=1)
 #lines shared with dim
-
-
-def lineCallback(data):
+path="/home/myturtlebot/catkin_ws/src/speakbot/line/"
+done_move=0
+result=0
+def callback_done_move(data):
+	global done_move
+	done_move=data.data
+	lineCallback()
+def callback_result(data):
+	global result
+	result=data.data
+	lineCallback()
+def lineCallback():
+	global done_move, result,path
 	#sharedLines = [0,0]
 	#line = data.data
-	line = data
-	if(os.path.isfile("/home/phong/Desktop/Robotic_2/project2/line/"+ str(line) +".mp3")):
-		value=1
-		#arm.publish(value)
-	
-		playsound("/home/phong/Desktop/Robotic_2/project2/line/"+ str(line) +".mp3")
-		#pros = Popen("ffplay -autoexit -nodisp /home/myturtlebot/catkin_ws/src/einstein/play1/"+ str(line) +".wav", shell=True);
-		#pros.wait()
-		#if line not shared with dim we publish done, else have dim publish
-		#if(line not in sharedLines):
-		value=0
-		arm.publish(value)
-		increment.publish(line)
-	return
+	line = data.data
+	if result==1:
+		result=0
+		playsound(path+"Win.mp3")
+	elif result==1:
+		result=0
+		playsound(path+"Lost.mp3")
+	elif result==3:
+		result=0
+		playsound(path+"Tie.mp3")
+	elif done_move!=0 and result==0:
+		done_move=0
+		value = randint(0, 5)
+		playsound(path+str(value)+".mp3"
+#rospy.init_node('speak_node')
+#rospy.Subscriber("/lines",Int32,lineCallback)
+#rospy.Subscriber("/done_move",Int32,callback_done_move)
+#rospy.Subscriber("/result",Int32,callback_result)
+#rospy.spin()
 
-
-lineCallback(1)
-#
-# rospy.init_node("Einstein")
-# increment = rospy.Publisher('/increment', Int32, queue_size=1)
-# rospy.Subscriber("/lines",Int32,lineCallback)
-# rospy.spin()
-#
